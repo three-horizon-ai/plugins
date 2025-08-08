@@ -47,5 +47,38 @@ export async function createRouter({
     res.json(await todoListService.getTodo({ id: req.params.id }));
   });
 
+  router.get('/list-devboxes', async (_req, res) => {
+    console.log('list-devboxes API:');
+  // Call Azure Dev Box REST API using token/config
+  // const result = await fetch('https://management.azure.com/....', {
+  //   headers: { Authorization: `Bearer ${token}` },
+  // });
+  // const json = await result.json();
+  const json = [
+    {
+      gender: 'female',
+      name: {
+        title: 'Miss',
+        first: 'Marta',
+        last: 'Moore',
+      },
+      email: 'carolyn.moore@example.com',
+      picture: 'https://api.dicebear.com/6.x/open-peeps/svg?seed=Carolyn',
+      nat: 'GB',
+    },
+    {
+      gender: 'female',
+      name: {
+        title: 'Ms',
+        first: 'Esma',
+        last: 'Berberoğlu',
+      },
+      email: 'esma.berberoglu@example.com',
+      picture: 'https://api.dicebear.com/6.x/open-peeps/svg?seed=Esma',
+      nat: 'TR',
+    }];
+  res.json(json);
+});
+
   return router;
 }

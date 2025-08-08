@@ -7,6 +7,9 @@ import {
   ResponseErrorPanel,
 } from '@backstage/core-components';
 import useAsync from 'react-use/lib/useAsync';
+import { discoveryApiRef, useApi } from '@backstage/core-plugin-api';
+
+
 
 export const exampleUsers = {
   results: [
@@ -293,10 +296,22 @@ export const DenseTable = ({ users }: DenseTableProps) => {
 };
 
 export const ExampleFetchComponent = () => {
-
+  const discoveryApi = useApi(discoveryApiRef);
   const { value, loading, error } = useAsync(async (): Promise<User[]> => {
+    const baseUrl = await discoveryApi.getBaseUrl('azure-devbox');
+    console.log('Fetching data from API... '+baseUrl);
+    const response = await fetch(`${baseUrl}/list-devboxes`);
+    // const response = await fetch('https://jsonplaceholder.typicode.com/todos', {
+    //   headers: {
+    //     'Content-Type': 'application/json',
+    //   },
+    // });
+
+    const data = await response.json();
+    console.log('Data from API:', data);
     // Would use fetch in a real world example
-    return exampleUsers.results;
+    // return exampleUsers.results;
+    return data;
   }, []);
 
   if (loading) {
