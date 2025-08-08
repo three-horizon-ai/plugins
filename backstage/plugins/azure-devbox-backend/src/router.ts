@@ -55,28 +55,59 @@ export async function createRouter({
   // });
   // const json = await result.json();
   const json = [
-    {
-      gender: 'female',
-      name: {
-        title: 'Miss',
-        first: 'Marta',
-        last: 'Moore',
+      {
+        "uri": "https://8a40af38-3b4c-4672-a6a4-5e964b1870ed-contosodevcenter.centralus.devcenter.azure.com/projects/myProject/users/b08e39b4-2ac6-4465-a35e-48322efb0f98/devboxes/MyDevBox",
+        "name": "MyDevBox",
+        "provisioningState": "Succeeded",
+        "projectName": "ContosoProject",
+        "poolName": "LargeDevWorkStationPool",
+        "location": "centralus",
+        "osType": "Windows",
+        "user": "b08e39b4-2ac6-4465-a35e-48322efb0f98",
+        "lastConnectedTime": "2022-04-01T00:13:23.323Z",
+        "hardwareProfile": {
+          "vCPUs": 8,
+          "memoryGB": 32
+        },
+        "storageProfile": {
+          "osDisk": {
+            "diskSizeGB": 1024
+          }
+        },
+        "hibernateSupport": "Enabled",
+        "imageReference": {
+          "name": "DevImage",
+          "version": "1.0.0",
+          "publishedDate": "2022-03-01T00:13:23.323Z"
+        }
       },
-      email: 'carolyn.moore@example.com',
-      picture: 'https://api.dicebear.com/6.x/open-peeps/svg?seed=Carolyn',
-      nat: 'GB',
-    },
-    {
-      gender: 'female',
-      name: {
-        title: 'Ms',
-        first: 'Esma',
-        last: 'Berberoğlu',
-      },
-      email: 'esma.berberoglu@example.com',
-      picture: 'https://api.dicebear.com/6.x/open-peeps/svg?seed=Esma',
-      nat: 'TR',
-    }];
+      {
+        "uri": "https://8a40af38-3b4c-4672-a6a4-5e964b1870ed-contosodevcenter.centralus.devcenter.azure.com/projects/myProject/users/b08e39b4-2ac6-4465-a35e-48322efb0f98/devboxes/MyDevBox",
+        "name": "MyDevBox",
+        "provisioningState": "Failed",
+        "projectName": "ContosoProject",
+        "poolName": "LargeDevWorkStationPool",
+        "location": "centralus",
+        "osType": "Windows",
+        "user": "b08e39b4-2ac6-4465-a35e-48322efb0f98",
+        "lastConnectedTime": "2022-04-01T00:13:23.323Z",
+        "hardwareProfile": {
+          "vCPUs": 8,
+          "memoryGB": 32
+        },
+        "storageProfile": {
+          "osDisk": {
+            "diskSizeGB": 1024
+          }
+        },
+        "hibernateSupport": "Enabled",
+        "imageReference": {
+          "name": "DevImage",
+          "version": "1.0.0",
+          "publishedDate": "2022-03-01T00:13:23.323Z"
+        }
+     
+  }];
   res.json(json);
 });
 
