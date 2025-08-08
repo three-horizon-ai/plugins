@@ -61,7 +61,7 @@ export const DenseTable = ({ devboxes }: DenseTableProps) => {
   ];
   console.log('Rendering DenseTable with devboxes:', devboxes);
   
-  const data = devboxes.map(devbox => (console.log('Processing devbox:', devbox),{
+  const data = devboxes.map(devbox => ({
     
     name: devbox.name,
     status: devbox.provisioningState,
