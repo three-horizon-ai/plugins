@@ -3,50 +3,21 @@ import { Link } from '@material-ui/core';
 import {
   Table,
   TableColumn,
-  Progress,
-  ResponseErrorPanel,
 } from '@backstage/core-components';
-import useAsync from 'react-use/lib/useAsync';
-import { discoveryApiRef, useApi } from '@backstage/core-plugin-api';
+import {useApi } from '@backstage/core-plugin-api';
+import { azureDevboxApiRef } from '../../api/AzureDevboxApiRef.ts';
+import { DevBox } from '../../api/AzureDevboxApi.types.ts';
+import { useEffect, useState } from 'react';
 
+export const DenseTable = () => {
+  
+  const devboxApi = useApi(azureDevboxApiRef);
+  const [devboxes, setDevboxes] = useState<DevBox[]>([]);
 
-interface HardwareProfile {
-  vCPUs: number;
-  memoryGB: number;
-}
+  useEffect(() => {
+    devboxApi.listDevboxes().then(setDevboxes).catch(console.error);
+  }, [devboxApi]);
 
-interface StorageProfile {
-  osDisk: {
-    diskSizeGB: number;
-  };
-}
-
-interface ImageReference {
-  name: string;
-  version: string;
-  publishedDate: string;
-}
-
-interface DevBox {
-  uri: string;
-  name: string;
-  provisioningState: string;
-  projectName: string;
-  poolName: string;
-  location: string;
-  osType: string;
-  user: string;
-  lastConnectedTime: string;
-  hardwareProfile: HardwareProfile;
-  storageProfile: StorageProfile;
-  hibernateSupport: string;
-  imageReference: ImageReference;
-}
-
-interface DenseTableProps {
-  devboxes: DevBox[];
-}
-export const DenseTable = ({ devboxes }: DenseTableProps) => {
   const columns: TableColumn[] = [
     { title: 'Name', field: 'name' },
     { title: 'Status', field: 'status' },
@@ -94,30 +65,30 @@ export const DenseTable = ({ devboxes }: DenseTableProps) => {
 
 export const ExampleFetchComponent = () => {
   
-  const discoveryApi = useApi(discoveryApiRef);
-  const { value, loading, error } = useAsync(async (): Promise<DevBox[]> => {
-    console.log('Fetching baseUrl from discoveryApi...');
-    const baseUrl = await discoveryApi.getBaseUrl('azure-devbox');
-    console.log('Fetching data from API... '+baseUrl);
-    const response = await fetch(`${baseUrl}/list-devboxes`);
-    // const response = await fetch('https://jsonplaceholder.typicode.com/todos', {
-    //   headers: {
-    //     'Content-Type': 'application/json',
-    //   },
-    // });
+  // const discoveryApi = useApi(discoveryApiRef);
+  // const { value, loading, error } = useAsync(async (): Promise<DevBox[]> => {
+  //   console.log('Fetching baseUrl from discoveryApi...');
+  //   const baseUrl = await discoveryApi.getBaseUrl('azure-devbox');
+  //   console.log('Fetching data from API... '+baseUrl);
+  //   const response = await fetch(`${baseUrl}/list-devboxes`);
+  //   // const response = await fetch('https://jsonplaceholder.typicode.com/todos', {
+  //   //   headers: {
+  //   //     'Content-Type': 'application/json',
+  //   //   },
+  //   // });
 
-    const data = await response.json();
-    console.log('Data from API:', data);
-    // Would use fetch in a real world example
-    // return exampleUsers.results;
-    return data;
-  }, []);
+  //   const data = await response.json();
+  //   console.log('Data from API:', data);
+  //   // Would use fetch in a real world example
+  //   // return exampleUsers.results;
+  //   return data;
+  // }, []);
 
-  if (loading) {
-    return <Progress />;
-  } else if (error) {
-    return <ResponseErrorPanel error={error} />;
-  }
+  // if (loading) {
+  //   return <Progress />;
+  // } else if (error) {
+  //   return <ResponseErrorPanel error={error} />;
+  // }
 
-  return <DenseTable devboxes={value || []} />;
+  return <DenseTable/>;
 };
