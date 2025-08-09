@@ -1,0 +1,1 @@
+yarn install && yarn run tsc && yarn run build:all && yarn run export-dynamic

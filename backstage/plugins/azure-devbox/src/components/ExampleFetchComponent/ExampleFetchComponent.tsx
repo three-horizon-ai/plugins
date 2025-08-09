@@ -93,8 +93,10 @@ export const DenseTable = ({ devboxes }: DenseTableProps) => {
 
 
 export const ExampleFetchComponent = () => {
+  
   const discoveryApi = useApi(discoveryApiRef);
   const { value, loading, error } = useAsync(async (): Promise<DevBox[]> => {
+    console.log('Fetching baseUrl from discoveryApi...');
     const baseUrl = await discoveryApi.getBaseUrl('azure-devbox');
     console.log('Fetching data from API... '+baseUrl);
     const response = await fetch(`${baseUrl}/list-devboxes`);

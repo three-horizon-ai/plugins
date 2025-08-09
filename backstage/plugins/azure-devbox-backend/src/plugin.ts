@@ -28,6 +28,7 @@ export const azureDevboxPlugin = createBackendPlugin({
       async init({ logger, auth, httpAuth, httpRouter, catalog, config }) {
        const subscriptionId = config.getString('azureDevBox.subscriptionId');
        console.log('AzureDevboxService subscriptionId: '+ subscriptionId)
+       console.log('AzureDevboxService config: ', logger, auth, catalog);
         const service = new AzureDevboxService({
           tenantId: process.env.AZURE_TENANT_ID || '',
           clientId: process.env.AZURE_CLIENT_ID || '',

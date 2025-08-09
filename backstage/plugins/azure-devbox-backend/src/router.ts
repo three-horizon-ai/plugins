@@ -1,13 +1,9 @@
 import { HttpAuthService } from '@backstage/backend-plugin-api';
-import { InputError } from '@backstage/errors';
-import { z } from 'zod';
 import express from 'express';
 import Router from 'express-promise-router';
-import { TodoListService } from './services/TodoListService/types';
 import { AzureDevboxService } from './services/AzureDevboxService';
 
 export async function createRouter({
-  httpAuth,
   service,
 }: {
   httpAuth: HttpAuthService;
