@@ -5,9 +5,7 @@ export interface AzureDevboxServiceOptions {
   tenantId: string;
   clientId: string;
   clientSecret: string;
-  subscriptionId: string;
-  devCenterName: string;
-  resourceGroupName: string;
+  devCenterURI: string;
 }
 
 
@@ -15,9 +13,7 @@ export class AzureDevboxService {
   private tenantId: string;
   private clientId: string;
   private clientSecret: string;
-  private subscriptionId: string;
-  private devCenterName: string;
-  private resourceGroupName: string;
+  private devCenterURI: string;
 
   private token?: string;
   private tokenExpiresAt?: number;
@@ -26,9 +22,7 @@ export class AzureDevboxService {
     this.tenantId = options.tenantId;
     this.clientId = options.clientId;
     this.clientSecret = options.clientSecret;
-    this.subscriptionId = options.subscriptionId;
-    this.devCenterName = options.devCenterName;
-    this.resourceGroupName = options.resourceGroupName;
+    this.devCenterURI = options.devCenterURI;
   }
 
   private async getAccessToken(): Promise<string> {
@@ -43,7 +37,7 @@ export class AzureDevboxService {
     const params = new URLSearchParams();
     params.append('client_id', this.clientId);
     params.append('client_secret', this.clientSecret);
-    params.append('scope', 'https://management.azure.com/.default');
+    params.append('scope', 'https://devcenter.azure.com/.default');
     params.append('grant_type', 'client_credentials');
 
     const res = await fetch(tokenUrl, {
@@ -71,16 +65,16 @@ export class AzureDevboxService {
     userId: string,
   ): Promise<any> {
 
-
+    console.log('AzureDevboxService: listDevBoxes called with', { projectName, userId });
     
     const accessToken = await this.getAccessToken();
 
     // Use discovery API if you have a custom proxy for Azure management API (optional)
     // Otherwise fallback to direct URL:
-    const baseUrl = `https://management.azure.com`;
+    const baseUrl = this.devCenterURI;
 
-    const url = `${baseUrl}/subscriptions/${this.subscriptionId}/resourceGroups/${this.resourceGroupName}/providers/Microsoft.DevCenter/devcenters/${this.devCenterName}/projects/${projectName}/users/${userId}/devboxes?api-version=2023-04-01`;
-
+    const url = `${baseUrl}/devboxes?api-version=2025-02-01`;
+    console.log('AzureDevboxService: Fetching devboxes from URL:', url);
     const res = await fetch(url, {
       headers: {
         Authorization: `Bearer ${accessToken}`,

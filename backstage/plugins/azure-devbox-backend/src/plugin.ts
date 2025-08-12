@@ -27,15 +27,18 @@ export const azureDevboxPlugin = createBackendPlugin({
       },
       async init({ logger, auth, httpAuth, httpRouter, catalog, config }) {
        const subscriptionId = config.getString('azureDevBox.subscriptionId');
+       const tenantId = config.getString('azureDevBox.tenantId');
+       const clientId = config.getString('azureDevBox.clientId');
+       const clientSecret = config.getString('azureDevBox.clientSecret');
+       const devCenterURI = config.getString('azureDevBox.devCenterURI');
+       
        console.log('AzureDevboxService subscriptionId: '+ subscriptionId)
        console.log('AzureDevboxService config: ', logger, auth, catalog);
         const service = new AzureDevboxService({
-          tenantId: process.env.AZURE_TENANT_ID || '',
-          clientId: process.env.AZURE_CLIENT_ID || '',
-          clientSecret: process.env.AZURE_CLIENT_SECRET || '',
-          subscriptionId: subscriptionId,
-          devCenterName: process.env.AZURE_DEV_CENTER_NAME || '',
-          resourceGroupName: process.env.AZURE_RESOURCE_GROUP_NAME || '',
+          tenantId: tenantId || '',
+          clientId: clientId || '',
+          clientSecret: clientSecret || '',
+          devCenterURI: devCenterURI || '',
         });
         console.log('AzureDevboxService initialized:'+ service)
         httpRouter.use(
@@ -45,18 +48,6 @@ export const azureDevboxPlugin = createBackendPlugin({
           }),
         );
 
-        // const todoListService = await createTodoListService({
-        //   logger,
-        //   auth,
-        //   catalog,
-        // });
-
-        // httpRouter.use(
-        //   await createRouter({
-        //     httpAuth,
-        //     todoListService,
-        //   }),
-        // );
       },
     });
   },
