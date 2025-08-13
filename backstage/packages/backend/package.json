@@ -41,6 +41,7 @@
     "@backstage/plugin-search-backend-node": "^1.3.8",
     "@backstage/plugin-techdocs-backend": "^1.11.6",
     "@internal/plugin-azure-devbox-backend": "workspace:^",
+    "@internal/plugin-scaffolder-backend-module-azure-devbox": "workspace:^",
     "app": "link:../app",
     "better-sqlite3": "^9.0.0",
     "node-gyp": "^10.0.0",

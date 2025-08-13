@@ -1,6 +1,6 @@
 #!/bin/bash
 
-PLUGINS=("azure-devbox" "azure-devbox-backend")
+PLUGINS=("azure-devbox" "azure-devbox-backend" "scaffolder-backend-module-azure-devbox")
 
 DYNAMIC_PLUGIN_ROOT_DIR=./deploy
 mkdir -p "$DYNAMIC_PLUGIN_ROOT_DIR"
