@@ -7,14 +7,17 @@ export class AzureDevboxClient implements AzureDevboxApi {
     private readonly discoveryApi: DiscoveryApi,
   ) {}
 
-  async listDevboxes(): Promise<DevBox[]> {
-    console.log('AzureDevboxClient: Starting listDevboxes()');
+  async listDevboxes(microsoftAccessToken: string ): Promise<DevBox[]> {
+    console.log('AzureDevboxClient: listDevboxes called with token:', microsoftAccessToken);
+
     const { token } = await this.identityApi.getCredentials();
     console.log('AzureDevboxClient: Retrieved token', token);
     const baseUrl = await this.discoveryApi.getBaseUrl('azure-devbox');
     console.log('AzureDevboxClient: Retrieved baseUrl', baseUrl);
     const resp = await fetch(`${baseUrl}/list-devboxes`, {
-      headers: { Authorization: `Bearer ${token}` },
+      headers: { 
+          Authorization: `Bearer ${token}` ,
+        'custom-msft-access-token': microsoftAccessToken },
     });
     console.log('AzureDevboxClient: Fetch response', resp);
 

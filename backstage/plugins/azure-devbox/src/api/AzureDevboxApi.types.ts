@@ -22,9 +22,14 @@ export interface DevBox {
     name: string;
     version: string;
     publishedDate: string;
-  };
+  },
+  remoteConnection: {
+    webUrl: string,
+    rdpConnectionUrl: string,
+    cloudPcConnectionUrl: string
+  }
 }
 
 export interface AzureDevboxApi {
-  listDevboxes(): Promise<DevBox[]>;
+  listDevboxes(microsoftAccessToken: string): Promise<DevBox[]>;
 }

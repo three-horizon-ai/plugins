@@ -1,5 +1,6 @@
-// azureDevboxService.ts
-import fetch from 'node-fetch';
+// import fetch from 'node-fetch';
+import https from 'https';
+import { URLSearchParams } from 'url';
 
 export interface AzureDevboxServiceOptions {
   tenantId: string;
@@ -8,15 +9,11 @@ export interface AzureDevboxServiceOptions {
   devCenterURI: string;
 }
 
-
 export class AzureDevboxService {
   private tenantId: string;
   private clientId: string;
   private clientSecret: string;
   private devCenterURI: string;
-
-  private token?: string;
-  private tokenExpiresAt?: number;
 
   constructor(options: AzureDevboxServiceOptions) {
     this.tenantId = options.tenantId;
@@ -25,66 +22,142 @@ export class AzureDevboxService {
     this.devCenterURI = options.devCenterURI;
   }
 
-  private async getAccessToken(): Promise<string> {
-    const now = Date.now();
+  
+  public async listDevBoxes(backstageToken: string, msftToken: string): Promise<any> {
 
-    if (this.token && this.tokenExpiresAt && now < this.tokenExpiresAt - 60000) {
-      // return cached token if not expired (minus 1min buffer)
-      return this.token;
-    }
-
-    const tokenUrl = `https://login.microsoftonline.com/${this.tenantId}/oauth2/v2.0/token`;
-    const params = new URLSearchParams();
-    params.append('client_id', this.clientId);
-    params.append('client_secret', this.clientSecret);
-    params.append('scope', 'https://devcenter.azure.com/.default');
-    params.append('grant_type', 'client_credentials');
-
-    const res = await fetch(tokenUrl, {
-      method: 'POST',
-      body: params,
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-      },
-    });
-
-    if (!res.ok) {
-      throw new Error(`Failed to get token: ${res.status} ${await res.text()}`);
-    }
-
-    const json = await res.json();
-
-    this.token = json.access_token;
-    this.tokenExpiresAt = now + json.expires_in * 1000;
-
-    return this.token!;
-  }
-
-  public async listDevBoxes(
-    projectName: string,
-    userId: string,
-  ): Promise<any> {
-
-    console.log('AzureDevboxService: listDevBoxes called with', { projectName, userId });
+    console.log('AzureDevboxService: listDevBoxes called with', { backstageToken });
     
-    const accessToken = await this.getAccessToken();
+    const userId = 'me';
+    console.log("USERID: ", userId);
+    // console.log('AzureDevboxService: Retrieved subject from token', sub);
+    const bxs = await this.listDevBoxes2(msftToken, userId);
+    console.log('AzureDevboxService: Retrieved devboxes:', bxs);
 
-    // Use discovery API if you have a custom proxy for Azure management API (optional)
-    // Otherwise fallback to direct URL:
-    const baseUrl = this.devCenterURI;
-
-    const url = `${baseUrl}/devboxes?api-version=2025-02-01`;
-    console.log('AzureDevboxService: Fetching devboxes from URL:', url);
-    const res = await fetch(url, {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-      },
-    });
-
-    if (!res.ok) {
-      throw new Error(`API error: ${res.status} ${await res.text()}`);
+    // For each dev box, fetch its remoteConnection
+    const devBoxesResult = bxs as { value: any[] };
+    if (devBoxesResult && Array.isArray(devBoxesResult.value)) {
+      const remoteConnections = await Promise.all(
+        devBoxesResult.value.map(async (devbox: any) => {
+          return await this.getRemoteConnectionForDevBox(devbox, msftToken);
+        })
+      );
+      console.log('AzureDevboxService: Retrieved remote connections:', remoteConnections);
+      devBoxesResult.value = remoteConnections;
+    }
+    return bxs;
+  }
+  /**
+   * Fetch remoteConnection for a given dev box
+   */
+  public  async getRemoteConnectionForDevBox(devbox: any, accessToken: string): Promise<any> {
+    console.log('AzureDevboxService: getRemoteConnectionForDevBox called with', { devbox, accessToken });
+    try {
+      const remoteConnUrl = `${this.devCenterURI}/projects/${devbox.projectName}/users/me/devboxes/${devbox.name}/remoteConnection?api-version=2025-02-01`;
+      console.log('AzureDevboxService: Remote connection URL:', remoteConnUrl);
+      const options = {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+          'Content-Type': 'application/json'
+        }
+      };
+      const remoteConnJson = await new Promise((resolve, reject) => {
+        const req = https.get(remoteConnUrl, options, res => {
+          let data = '';
+          res.on('data', chunk => data += chunk);
+          res.on('end', () => {
+            try {
+              const json = JSON.parse(data);
+              resolve(json);
+            } catch (err) {
+              reject(err);
+            }
+          });
+        });
+        req.on('error', err => {
+          reject(err);
+        });
+      });
+      console.log('AzureDevboxService: Retrieved remoteConnection:', devbox, remoteConnJson);
+      return { ...devbox, remoteConnection: remoteConnJson };
+    } catch (err) {
+      console.error(`Error fetching remoteConnection for devbox ${devbox.name}:`, err);
+      return { ...devbox, remoteConnection: null };
     }
 
-    return res.json();
   }
+
+
+  getAccessToken2(): Promise<string> {
+    return new Promise((resolve, reject) => {
+        const params = new URLSearchParams({
+            grant_type: 'client_credentials',
+            client_id: this.clientId,
+            client_secret: this.clientSecret,
+            scope: 'https://devcenter.azure.com/.default'
+        });
+
+        const options = {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded'
+            }
+        };
+
+        const req = https.request(
+            `https://login.microsoftonline.com/${this.tenantId}/oauth2/v2.0/token`,
+            options,
+            res => {
+                let data = '';
+                res.on('data', chunk => data += chunk);
+                res.on('end', () => {
+                    try {
+                        const json = JSON.parse(data);
+                        resolve(json.access_token);
+                    } catch (err) {
+                        reject(err);
+                    }
+                });
+            }
+        );
+
+        req.on('error', reject);
+        req.write(params.toString());
+        req.end();
+    });
+  }
+
+  listDevBoxes2(accessToken: string, userId: string) {
+    const url = `${this.devCenterURI}/projects/your-project-name/users/${userId}/devboxes?api-version=2025-02-01`;
+    const options = {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${accessToken}`,
+        'Content-Type': 'application/json'
+      }
+    };
+    return new Promise((resolve, reject) => {
+      const req = https.get(url, options, res => {
+        let data = '';
+        res.on('data', chunk => data += chunk);
+        res.on('end', () => {
+          try {
+            const json = JSON.parse(data);
+            console.log(JSON.stringify(json, null, 2));
+            resolve(json);
+          } catch (err) {
+            console.log(data);
+            reject(err);
+          }
+        });
+      });
+      req.on('error', err => {
+        console.error('Error:', err);
+        reject(err);
+      });
+    });
+  }
+
+  
+
 }

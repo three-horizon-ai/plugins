@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link } from '@material-ui/core';
+import { Link, Button } from '@material-ui/core';
 import {
   Table,
   TableColumn,
@@ -8,16 +8,42 @@ import {useApi } from '@backstage/core-plugin-api';
 import { azureDevboxApiRef } from '../../api/AzureDevboxApiRef.ts';
 import { DevBox } from '../../api/AzureDevboxApi.types.ts';
 import { useEffect, useState } from 'react';
+import { PublicClientApplication } from '@azure/msal-browser';
 
-export const DenseTable = () => {
-  
+const DenseTable = () => {
   const devboxApi = useApi(azureDevboxApiRef);
   const [devboxes, setDevboxes] = useState<DevBox[]>([]);
 
-  useEffect(() => {
-    devboxApi.listDevboxes().then(setDevboxes).catch(console.error);
-  }, [devboxApi]);
+const msalConfig = {
+  auth: {
+    clientId: '62ac47b7-e8ea-4ee0-a05a-1a5af8e48cd8', // Replace with your Azure AD client ID
+    authority: 'https://login.microsoftonline.com/2a156722-5941-4c63-b535-f5370769efc7', // Replace with your tenant ID
+    redirectUri: window.location.origin,
+  },
+};
+  const msalInstance = new PublicClientApplication(msalConfig);
+  
 
+  const handleSearch = async () => {
+    console.log('Search button clicked');
+    await msalInstance.initialize();
+    await msalInstance.handleRedirectPromise();
+    try {
+      const loginResponse = await msalInstance.loginPopup({
+        scopes: ['https://devcenter.azure.com/.default'],
+      });
+      const accessToken = loginResponse.accessToken;
+      console.log('Access token:', accessToken);
+      devboxApi.listDevboxes(accessToken).then(setDevboxes).catch(console.error);
+
+    } catch (err) {
+      console.error('Login or fetch failed:', err);
+    }
+  };
+
+  useEffect(() => {
+    // devboxApi.listDevboxes('accessToken').then(setDevboxes).catch(console.error);
+  }, [devboxApi]);
   const columns: TableColumn[] = [
     { title: 'Name', field: 'name' },
     { title: 'Status', field: 'status' },
@@ -30,7 +56,6 @@ export const DenseTable = () => {
     { title: 'Connected', field: 'lastConnected' },
     { title: 'Link', field: 'link' },
   ];
-  console.log('Rendering DenseTable with devboxes:', devboxes);
   
   const data = devboxes.map(devbox => ({
     
@@ -46,49 +71,30 @@ export const DenseTable = () => {
       ? new Date(devbox.lastConnectedTime).toLocaleString()
       : 'Never',
     link: (
-      <Link href={devbox.uri} target="_blank" rel="noopener noreferrer" style={{ cursor: 'pointer' }}>
+      <Link href={devbox.remoteConnection.webUrl} target="_blank" rel="noopener noreferrer" style={{ cursor: 'pointer' }}>
         Open
       </Link>
     ),
   }));
 
-  return (
+return (
+  <>
+    <Button variant="contained" color="primary" onClick={handleSearch}>
+      Search
+    </Button>
     <Table
       title="Dev Boxes"
       options={{ search: false, paging: false }}
       columns={columns}
       data={data}
     />
-  );
+  </>
+);
 };
 
 
+
 export const ExampleFetchComponent = () => {
-  
-  // const discoveryApi = useApi(discoveryApiRef);
-  // const { value, loading, error } = useAsync(async (): Promise<DevBox[]> => {
-  //   console.log('Fetching baseUrl from discoveryApi...');
-  //   const baseUrl = await discoveryApi.getBaseUrl('azure-devbox');
-  //   console.log('Fetching data from API... '+baseUrl);
-  //   const response = await fetch(`${baseUrl}/list-devboxes`);
-  //   // const response = await fetch('https://jsonplaceholder.typicode.com/todos', {
-  //   //   headers: {
-  //   //     'Content-Type': 'application/json',
-  //   //   },
-  //   // });
 
-  //   const data = await response.json();
-  //   console.log('Data from API:', data);
-  //   // Would use fetch in a real world example
-  //   // return exampleUsers.results;
-  //   return data;
-  // }, []);
-
-  // if (loading) {
-  //   return <Progress />;
-  // } else if (error) {
-  //   return <ResponseErrorPanel error={error} />;
-  // }
-
-  return <DenseTable/>;
+  return <DenseTable />;
 };
