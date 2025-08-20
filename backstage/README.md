@@ -14,16 +14,22 @@ yarn dev
 
 ```
 plugins:
+  - package: ./local-plugins/internal-plugin-scaffolder-backend-module-azure-devbox-dynamic-0.1.0.tgz
+    disabled: false
+    integrity: "sha512-HkyQqorVfpGvES+O47j05/meB/QaLqxrge+lMH+B7e6rppbyOkE4gxLdlL9nPwaKPJiEBeV8Ak9EPqx3egwpEA=="
   - package: ./local-plugins/internal-plugin-azure-devbox-backend-dynamic-0.1.0.tgz
     disabled: false
-    integrity: "sha512-mvbKFCa/OksCES2ONZ/iH+JJEJUk2Ef7Jf0dhjAyt8uPiqvQVfZNBCnl7rdXi1CRLodLDKhuIZYYIZmUiv6fIg=="
+    integrity: "sha512-zP+lQXL9l7QkHDFAeYoDfur1K/ILfxUy8cZncOazot8uUYROYjiixX3oaglsIHkouBCYsOfL9N1QfNDWCIxHXA=="
   - package: ./local-plugins/internal-plugin-azure-devbox-dynamic-0.1.0.tgz
     disabled: false
-    integrity: "sha512-8T1MH7If2GNCMe/vYvP6rR7lARYZ37glIQypEyqw5z1Ai3b7EjZ3BM7+YWZyhxs0QYpH/af+jHWT6fjpQNLB5w=="
+    integrity: "sha512-e5S6eGiY1pUpQYa5h/idOgDlMZoctrdsdtfRf/3IoGUs2zcve2J2AKYp707+5MXtuXtwd9GwWOjoulsx4JbMSw=="
     pluginConfig:
+
       dynamicPlugins:
         frontend:
           internal.plugin-azure-devbox:
+            scaffolderFieldExtensions:
+            - importName: ValidateKebabCaseFieldExtension
             appIcons:
             - name: computerIcon
               importName: ComputerIcon

@@ -1,5 +1,4 @@
 import { createTemplateAction } from '@backstage/plugin-scaffolder-node';
-import { DeviceCodeCredential } from "@azure/identity";
 import AzureDeveloperDevCenter from "@azure-rest/developer-devcenter";
 
 /**
@@ -18,6 +17,7 @@ export function createExampleAction() {
     devBoxName: string;
     projectName: string;
     poolName: string;
+    accessToken: string;
   }>({
     id: 'azure:create-devbox',
     description: 'Creates a new Azure Devbox',
@@ -40,6 +40,10 @@ export function createExampleAction() {
             description: "The Dev Box pool name",
             default: "three-horizons-pool",
             type: 'string',
+          },accessToken: {
+            title: 'Access Token',
+            description: "The Azure Dev Center access token",
+            type: 'string',
           },
         },
       },
@@ -54,23 +58,20 @@ export function createExampleAction() {
       }
 
       ctx.logger.info("Creating Azure Dev Box..");
-      const credential = new DeviceCodeCredential({
-        // tenantId: "2a156722-5941-4c63-b535-f5370769efc7", // optional
-        userPromptCallback: (info) => {
-          ctx.logger.info(info.message);
-        },
-      });
-      ctx.logger.info("DeviceCodeCredential created successfully");
 
-      // Request a token for Azure Resource Manager scope
-      // const token: AccessToken | null = await credential.getToken("https://management.azure.com/.default", {requestOptions:{timeout: 60000}});
-      // ctx.logger.info(`Access token: ${token?.token}`);
-      const userId = "me"; // "me" means current authenticated user
-      // const subscriptionId = "aca2dc4a-9d62-4b64-82d4-11e152d98f02"; // Your Azure subscription ID
-      const endpoint = "https://2a156722-5941-4c63-b535-f5370769efc7-devbox-demo-paula.eastus.devcenter.azure.com"
-      const client = AzureDeveloperDevCenter(endpoint, credential);
-      //use the client to create a
-      
+
+      // Use accessToken from input parameter
+      const accessToken = ctx.input.accessToken;
+      ctx.logger.info('Using access token from input:', accessToken);
+
+      // If AzureDeveloperDevCenter supports direct token usage, pass it here
+      const userId = "me";
+      const endpoint = "https://2a156722-5941-4c63-b535-f5370769efc7-devbox-demo-paula.eastus.devcenter.azure.com";
+      // You may need to use a custom credential or pass the token in headers
+      const client = AzureDeveloperDevCenter(endpoint, {
+        getToken: async () => ({ token: accessToken, expiresOnTimestamp: Date.now() + 3600 * 1000 })
+      });
+
       ctx.logger.info(`Creating Dev Box with name: ${ctx.input.devBoxName}`);
       
       const response = await client

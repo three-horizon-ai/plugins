@@ -33,3 +33,17 @@ export const AzureDevboxPage = azureDevboxPlugin.provide(
     mountPoint: rootRouteRef,
   }),
 );
+
+
+import { scaffolderPlugin } from '@backstage/plugin-scaffolder';
+import { createScaffolderFieldExtension } from '@backstage/plugin-scaffolder-react';
+import {
+  ValidateKebabCase,
+} from './scaffolder/ValidateKebabCase/ValidateKebabCaseExtension';
+
+export const ValidateKebabCaseFieldExtension = scaffolderPlugin.provide(
+  createScaffolderFieldExtension({
+    name: 'ValidateKebabCase',
+    component: ValidateKebabCase,
+  }),
+);
